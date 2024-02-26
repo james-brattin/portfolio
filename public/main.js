@@ -14,4 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.appendChild(newDiv);
     })
     .catch(error => console.error('Error:', error));
+  
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js');
+  }
 });
