@@ -41,18 +41,21 @@ self.addEventListener('fetch', async (event) => {
   // cache first
   const isPrecachedRequest = PRECACHE_URLS.includes(url.pathname);
   if (isPrecachedRequest) {
-    event.respondWith(async () => {
+    event.respondWith(async function() {
       try {
         const cache = await caches.open(PRECACHE)
-        return cache.match(event.request.url);
+        return await cache.match(event.request.url);
       } catch (error) {
-        return caches.match(event.request);
+        const fetchedResponse = await fetch(event.request);
+        const cache = await caches.open(PRECACHE);
+        cache.put(event.request.url, fetchedResponse.clone());
+        return fetchedResponse;
       }
     });
   }
 
   // network first
-  event.respondWith(async () => {
+  event.respondWith(async function() {
     try {
       const fetchedResponse = await fetch(event.request.url);
       const cache = await caches.open(NETWORK_FIRST_THEN_CACHE);
