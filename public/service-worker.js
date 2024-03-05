@@ -34,7 +34,7 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  const isPrecachedRequest = precachedAssets.includes(url.pathname);
+  const isPrecachedRequest = PRECACHE_URLS.includes(url.pathname);
 
   if (isPrecachedRequest) {
     event.respondWith(caches.open(cacheName).then((cache) => {
