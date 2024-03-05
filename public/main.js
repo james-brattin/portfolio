@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js');
+  }
+
   const newDiv = document.createElement("div");
 
   fetch(`${document.location}.netlify/functions/hello`)
@@ -14,8 +18,4 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.appendChild(newDiv);
     })
     .catch(error => console.error('Error:', error));
-  
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js');
-  }
 });
