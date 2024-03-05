@@ -32,27 +32,36 @@ self.addEventListener('activate', event => {
   );
 });
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', async (event) => {
   const url = new URL(event.request.url);
-  const isPrecachedRequest = PRECACHE_URLS.includes(url.pathname);
 
+  // ignore chrome extensions
+  if (!url.protocol.startsWith('http')) return;
+
+  // cache first
+  const isPrecachedRequest = PRECACHE_URLS.includes(url.pathname);
   if (isPrecachedRequest) {
-    event.respondWith(caches.open(cacheName).then((cache) => {
-      return cache.match(event.request.url);
-    }));
+    event.respondWith(async () => {
+      try {
+        const cache = await caches.open(PRECACHE)
+        return cache.match(event.request.url);
+      } catch (error) {
+        return caches.match(event.request);
+      }
+    });
   }
 
-  event.respondWith(caches.open(NETWORK_FIRST_THEN_CACHE).then((cache) => {
-    // Go to the network first
-    return fetch(event.request.url).then((fetchedResponse) => {
+  // network first
+  event.respondWith(async () => {
+    try {
+      const fetchedResponse = await fetch(event.request.url);
+      const cache = await caches.open(NETWORK_FIRST_THEN_CACHE);
       cache.put(event.request, fetchedResponse.clone());
-
       return fetchedResponse;
-    }).catch(() => {
-      // If the network is unavailable, get
-      return cache.match(event.request.url);
-    });
-  }));
+    } catch (error) {
+      return await caches.match(event.request);
+    }
+  })
 });
 
 // The fetch handler serves responses for same-origin resources from a cache.
