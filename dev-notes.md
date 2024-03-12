@@ -1,0 +1,1 @@
+Using the Rancho google font in favicon.
